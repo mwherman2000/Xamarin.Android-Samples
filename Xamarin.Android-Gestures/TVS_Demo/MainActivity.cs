@@ -48,7 +48,24 @@ namespace TVS_Demo
         {
             Toast.MakeText(this, "On Touch", ToastLength.Short).Show();
 
+            DumpPointerCoords("OnTouch", e);
+
             return gestureDetector.OnTouchEvent(e);
+        }
+
+        private void DumpPointerCoords(string tag, MotionEvent e)
+        {
+            MotionEvent.PointerCoords outPointerCoords = new MotionEvent.PointerCoords();
+            int pointerCount = e.PointerCount;
+            for (int i = 0; i < pointerCount; i++)
+            {
+                e.GetPointerCoords(i, outPointerCoords);
+                System.Diagnostics.Debug.WriteLine(tag 
+                    + "\tA:" + e.Action.ToString()
+                    + "\t#:" + i.ToString() + "/" + pointerCount.ToString() 
+                    + "\tX:" + e.GetRawX(i).ToString() + "\tY:" + e.GetRawY(i).ToString()
+                    + "\tP:" + e.GetPressure(i).ToString() + "\tS:" + e.GetSize(i).ToString());
+            }
         }
 
         public bool OnDown(MotionEvent e)
@@ -61,6 +78,9 @@ namespace TVS_Demo
         public bool OnFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
         {
             bool result = false;
+
+            DumpPointerCoords("OnFling", e1);
+            DumpPointerCoords("OnFling", e2);
 
             try
             {
@@ -123,11 +143,16 @@ namespace TVS_Demo
         public void OnLongPress(MotionEvent e)
         {
             Toast.MakeText(this, "On Long Press", ToastLength.Short).Show();
+
+            DumpPointerCoords("OnLongPress", e);
         }
 
         public bool OnScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY)
         {
             Toast.MakeText(this, "On Scroll", ToastLength.Short).Show();
+
+            DumpPointerCoords("OnScroll", e1);
+            DumpPointerCoords("OnScroll", e2);
 
             return true;
         }
@@ -136,11 +161,41 @@ namespace TVS_Demo
         {
             Toast.MakeText(this, "On Show Press", ToastLength.Short).Show();
 
+            DumpPointerCoords("OnShowPress", e);
         }
 
         public bool OnSingleTapUp(MotionEvent e)
         {
             Toast.MakeText(this, "On Single Tab Up", ToastLength.Short).Show();
+
+            DumpPointerCoords("OnSingleTapUp", e);
+
+            return true;
+        }
+        public bool OnContextClick(MotionEvent e)
+        {
+            DumpPointerCoords("OnContextClick", e);
+
+            return true;
+        }
+
+        public bool OnDoubleTap(MotionEvent e)
+        {
+            DumpPointerCoords("OnDoubleTap", e);
+
+            return true;
+        }
+
+        public bool OnDoubleTapEvent(MotionEvent e)
+        {
+            DumpPointerCoords("OnDoubleTapEvent", e);
+
+            return true;
+        }
+
+        public bool OnSingleTapConfirmed(MotionEvent e)
+        {
+            DumpPointerCoords("OnSingleTapConfirmed", e);
 
             return true;
         }
