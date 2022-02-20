@@ -6,13 +6,13 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
-using static Android.Views.GestureDetector;
+// using static Android.Views.GestureDetector; // MWH - don't need to gesture recognizer
 using static Android.Views.View;
 
 namespace TVS_Demo
 {
     [Activity(Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, ScreenOrientation = Android.Content.PM.ScreenOrientation.Portrait)]
-    public class MainActivity : AppCompatActivity, IOnTouchListener, IOnGestureListener
+    public class MainActivity : AppCompatActivity, IOnTouchListener //,  IOnGestureListener // MWH - don't need to gesture recognizer
     {
         private TextView txtGestureView;
         private readonly int SWIPE_MIN_DISTANCE = 120;
@@ -21,7 +21,7 @@ namespace TVS_Demo
 
         private int imageIndex = 0;
 
-        private GestureDetector gestureDetector;
+        // private GestureDetector gestureDetector; // MWH - don't need to gesture recognizer
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -31,7 +31,7 @@ namespace TVS_Demo
 
             txtGestureView = FindViewById<TextView>(Resource.Id.imageView);
 
-            gestureDetector = new GestureDetector(this);
+            // gestureDetector = new GestureDetector(this); // MWH - don't need to gesture recognizer
 
             txtGestureView.SetOnTouchListener(this);
 
@@ -50,8 +50,11 @@ namespace TVS_Demo
 
             DumpPointerCoords("OnTouch", e);
 
-            return gestureDetector.OnTouchEvent(e);
+            return true; // return gestureDetector.OnTouchEvent(e); // MWH - don't need to gesture recognizer
         }
+
+        private static DateTime dtStart = DateTime.MaxValue;
+        private static DateTime dtEnd = dtStart;
 
         private void DumpPointerCoords(string tag, MotionEvent e)
         {
@@ -59,12 +62,52 @@ namespace TVS_Demo
             int pointerCount = e.PointerCount;
             for (int i = 0; i < pointerCount; i++)
             {
-                e.GetPointerCoords(i, outPointerCoords);
-                System.Diagnostics.Debug.WriteLine(tag 
-                    + "\tA:" + e.Action.ToString()
-                    + "\t#:" + i.ToString() + "/" + pointerCount.ToString() 
-                    + "\tX:" + e.GetRawX(i).ToString() + "\tY:" + e.GetRawY(i).ToString()
-                    + "\tP:" + e.GetPressure(i).ToString() + "\tS:" + e.GetSize(i).ToString());
+                //e.GetPointerCoords(i, outPointerCoords);
+                //System.Diagnostics.Debug.WriteLine(tag 
+                //    + "\tA:" + e.Action.ToString()
+                //    + "\t#:" + i.ToString() + "/" + pointerCount.ToString() 
+                //    + "\tX:" + e.GetRawX(i).ToString() + "\tY:" + e.GetRawY(i).ToString()
+                //    + "\tP:" + e.GetPressure(i).ToString() + "\tS:" + e.GetSize(i).ToString());
+                int scaledPressure = (int)Math.Round(e.GetPressure(i) * 10);
+                if (scaledPressure < 0) scaledPressure = 0;
+                if (scaledPressure > 9) scaledPressure = 9;
+
+                if (dtStart == DateTime.MaxValue) dtStart = DateTime.Now;
+                dtEnd = DateTime.Now;
+                int elapsedMs = (int)Math.Round(dtEnd.Subtract(dtStart).TotalMilliseconds);
+
+                switch (e.Action)
+                {
+                    case MotionEventActions.Down:
+                        {
+                            System.Diagnostics.Debug.WriteLine("");
+                            System.Diagnostics.Debug.WriteLine((scaledPressure.ToString() + ":" + "".PadRight(scaledPressure*2, 'p')).PadRight(30, ' ')
+                                + "P:" + e.GetPressure(i).ToString() + " T:" + elapsedMs.ToString());
+                            break;
+                        }
+                    case MotionEventActions.Move:
+                        {
+                            System.Diagnostics.Debug.WriteLine((scaledPressure.ToString() + ":" + "".PadRight(scaledPressure*2, 's')).PadRight(30, ' ')
+                                + "P:" + e.GetPressure(i).ToString() + " T:" + elapsedMs.ToString());
+                            break;
+                        }
+                    case MotionEventActions.Up:
+                        {
+                            System.Diagnostics.Debug.WriteLine((scaledPressure.ToString() + ":" + "".PadRight(scaledPressure*2, 'r')).PadRight(30, ' ')
+                                + "P:" + e.GetPressure(i).ToString() + " T:" + elapsedMs.ToString());
+                            break;
+                        }
+                    default:
+                        {
+                            System.Diagnostics.Debug.WriteLine(tag
+                                + "\tA:" + e.Action.ToString()
+                                + "\t#:" + i.ToString() + "/" + pointerCount.ToString()
+                                + "\tX:" + e.GetRawX(i).ToString() + "\tY:" + e.GetRawY(i).ToString()
+                                + "\tP:" + e.GetPressure(i).ToString() + "\tS:" + e.GetSize(i).ToString());
+                            break;
+                        }
+                }
+                dtStart = dtEnd;
             }
         }
 
